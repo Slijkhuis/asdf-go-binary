@@ -10,3 +10,7 @@ insert_final_newline = true
 [*.{md,yml,yaml}]
 indent_style = space
 indent_size = 2
+
+# https://github.com/mvdan/sh/blob/master/cmd/shfmt/shfmt.1.scd#examples
+[*.{sh,bash}]
+indent_style = tab

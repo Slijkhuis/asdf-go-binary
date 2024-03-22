@@ -8,13 +8,11 @@ toolname="$(basename "$(dirname "${__dirname}")")"
 readonly __dirname
 readonly toolname
 
-GH_REPO_LOCATION=$(yq ".binaries.$toolname.github" $__dirname/registry.yaml)
+GH_REPO_LOCATION=$(yq ".binaries.$toolname.github" "$__dirname/registry.yaml")
 GH_REPO="https://${GH_REPO_LOCATION}.git"
-GO_PROJECT=$(yq ".binaries.$toolname.package.project" $__dirname/registry.yaml)
-GO_MODULE=$(yq ".binaries.$toolname.package.module" $__dirname/registry.yaml)
-GO_INSTALLED_TOOL_NAME=$(yq ".binaries.$toolname.binary.name" $__dirname/registry.yaml)
-GO_INSTALLED_TOOL_TEST=$(yq ".binaries.$toolname.binary.test" $__dirname/registry.yaml)
-
+GO_PROJECT=$(yq ".binaries.$toolname.package.project" "$__dirname/registry.yaml")
+GO_MODULE=$(yq ".binaries.$toolname.package.module" "$__dirname/registry.yaml")
+GO_INSTALLED_TOOL_TEST=$(yq ".binaries.$toolname.binary.test" "$__dirname/registry.yaml")
 
 fail() {
 	echo -e "asdf-go-binary: $toolname $*"
@@ -40,9 +38,9 @@ list_github_tags() {
 }
 
 list_go_module_versions() {
-  VERSIONS=$(go list -m -versions "$GO_PROJECT" | tr ' ' '\n' | sed 's/^v//' | grep -v "$GO_PROJECT" || true)
+	VERSIONS=$(go list -m -versions "$GO_PROJECT" | tr ' ' '\n' | sed 's/^v//' | grep -v "$GO_PROJECT" || true)
 
-  echo $VERSIONS | tr ' ' '\n'
+	echo "$VERSIONS" | tr ' ' '\n'
 }
 
 list_all_versions() {
@@ -62,28 +60,28 @@ download_release() {
 }
 
 install_version() {
-  local install_type="$1"
-  local version="v$2"
-  local install_path="${3%/bin}/bin"
+	local install_type="$1"
+	local version="v$2"
+	local install_path="${3%/bin}/bin"
 
-  if [ "$install_type" != "version" ]; then
-    fail "asdf-go-binary: $toolname supports release installs only"
-  fi
+	if [ "$install_type" != "version" ]; then
+		fail "asdf-go-binary: $toolname supports release installs only"
+	fi
 
-  if [ "$version" == "v0.0.0" ]; then
-    version="latest"
-  fi
+	if [ "$version" == "v0.0.0" ]; then
+		version="latest"
+	fi
 
-  (
-    GOBIN="${install_path}" go install "${GO_MODULE}@${version}"
+	(
+		GOBIN="${install_path}" go install "${GO_MODULE}@${version}"
 
-    local tool_cmd
-    tool_cmd="$(echo "$GO_INSTALLED_TOOL_TEST" | cut -d' ' -f1)"
-    test -x "$install_path/$tool_cmd" || fail "Expected $install_path/$tool_cmd to be executable."
+		local tool_cmd
+		tool_cmd="$(echo "$GO_INSTALLED_TOOL_TEST" | cut -d' ' -f1)"
+		test -x "$install_path/$tool_cmd" || fail "Expected $install_path/$tool_cmd to be executable."
 
-    echo "$toolname $version installation was successful!"
-  ) || (
-    rm -rf "$install_path"
-    fail "An error occurred while installing $toolname $version."
-  )
+		echo "$toolname $version installation was successful!"
+	) || (
+		rm -rf "$install_path"
+		fail "An error occurred while installing $toolname $version."
+	)
 }

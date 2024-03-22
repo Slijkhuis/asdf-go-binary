@@ -2,8 +2,7 @@
 
 shellcheck --shell=bash --external-sources \
 	bin/* --source-path=template/lib/ \
-	lib/* \
+	lib/*.bash \
 	scripts/*
 
-shfmt --language-dialect bash --diff \
-	./**/*
+shfmt --language-dialect bash --diff .
